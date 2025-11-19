@@ -1,9 +1,24 @@
 import customtkinter as ctk
+import os, sys
+
+
+
+
 numbers = [0,1,2,3,4,5,6,7,8,9]
 signs = ["+", "-", "x", "/", "(", ")"]
+
+
+
+#All this Function does is find the icon
+# def resource_path(relative_path):
+#     if hasattr(sys, "_MEIPASS"):
+#         return os.path.join(sys._MEIPASS, relative_path)
+#     return os.path.join(os.path.abspath("."), relative_path)
+
+
 #   Defining important functions
 
-#       Conversion functions
+#       Conversion functions: Basically turns a string to a number or float. Pretty simple
 def convert(str):
     if "." in str:
         try:
@@ -21,17 +36,22 @@ def convert(str):
             return str
         
 
-#   Converting String to array
-def extract(st):
+#   This function is the heart of the code.
+# It takes a string(equation) as input and converts it to an array containing the individual elements of the equation
+def toArr(st):
+    #Local variables used in the function
     brackets = []
     tmpValue = ''
     eq=[]
     counter=0
 
+    #Loops through a given string
     i = 0
     while i < len(st):
         l = st[i]
+        #Checks if "l" is a sign
         if l in signs:
+            #This handles parantheses
             if l == "(":
                 brackets.append(i)
                 if tmpValue != '' and len(brackets) == 1:
@@ -39,32 +59,43 @@ def extract(st):
                     eq.append("x")
                     tmpValue = ''
                 counter+=1
+                #starts a sub loop that basically extracts everything inside brackets and solves that first
                 for j in range(i+1, len(st)):
                     k = st[j]
+                    #For handling nested brackets
                     if k == "(":
                         counter+=1
                     elif k == ")":
-                        counter-=1
+                        counter-=1 #This line just makes sure we close at the right bracket
                         if counter == 0:
+                            #Extracts string within a bracket and solves it
                             bracketString = st[brackets[0]+1: j]
-                            tmpValue += extract(bracketString)
+                            tmpValue += toArr(bracketString)
                             i=j
                             brackets=[]
+                            #Checks the next char in the string
                             try:
                                 newTmp = st[i+1]
+                                #If next char is a number or bracket - Put a "x" between them
                                 if newTmp not in signs or newTmp == "(":
                                     eq.append(tmpValue)
                                     tmpValue=''
                                     eq.append('x')
+                            #If there isn't it breaks the main loop and sends the array to the solve function
                             except:
                                 eq.append(tmpValue)
                                 i+=1
                                 return solve(eq)
+                            #Just breaks the sub -loop when a bracket is closed
                             break
+                        #Checks if all brackets are closed
                         if j == len(st)-1 and counter>0:
-                            print("SYNTAX ERROR: No closing bracket found")
-                            return "ERROR"
+                            bracketString = st[brackets[0]+1:]
+                            eq.append(toArr(bracketString))
+                            return solve(eq)
 
+            #################################
+            #This section handles every other sign
             elif l != "-" and tmpValue == "":
                 print("SYNTAX ERROR")
                 return None
@@ -75,6 +106,7 @@ def extract(st):
                     eq.append(tmpValue)
                 tmpValue = ""
                 eq.append(l)
+            #################################
         else:
             tmpValue += l
         if i == len(st) - 1 and tmpValue != "":
@@ -93,7 +125,7 @@ def solve(arr):
         print("This can't work:", arr)
         return
     elif len(arr) == 1:
-        return convert(arr[0])
+        return arr[0]
     else:
         if "/" in arr:
             return divide(arr, arr.index('/'))
@@ -124,10 +156,12 @@ def divide(arr, index):
             num2 = convert(arr[in2])
             if num2 != 0:
                 res =  num1/num2
+                arr.pop(in1)
+                arr.pop(in1)
+                arr.pop(in1)
+                if int(res) == res:
+                    res = int(res)
                 res = str(res)
-                arr.pop(in1)
-                arr.pop(in1)
-                arr.pop(in1)
                 arr.insert(in1, res)
                 return solve(arr)
             else:
@@ -223,6 +257,8 @@ calculator.minsize(186.5,322.5)
 calculator.grid_rowconfigure(0, weight=1)
 calculator.grid_rowconfigure(1, weight=10)
 calculator.grid_columnconfigure(0, weight=1)
+# icon_path = resource_path("favicon.ico")
+# calculator.iconbitmap(icon_path)
 
 # Display frame
 display = ctk.CTkFrame(master=calculator, fg_color='white')
@@ -249,7 +285,7 @@ def button_click(text):
         display_label.configure(text=new_text)
     elif text == "=":
         equation = display_label.cget("text")
-        result = extract(equation)
+        result = toArr(equation)
         display_label.configure(text=result)
     else:
         current_text = display_label.cget("text")

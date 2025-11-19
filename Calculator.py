@@ -1,6 +1,5 @@
 import customtkinter as ctk
 import os, sys
-#Testing branch
 
 
 
@@ -90,10 +89,11 @@ def toArr(st):
                             #Just breaks the sub -loop when a bracket is closed
                             break
                         #Checks if all brackets are closed
-                        if j == len(st)-1 and counter>0:
-                            bracketString = st[brackets[0]+1:]
-                            eq.append(toArr(bracketString))
-                            return solve(eq)
+                    if j == len(st)-1 and counter>0:
+                        bracketString = st[brackets[0]+1:]
+                        print(bracketString)
+                        eq.append(toArr(bracketString))
+                        return solve(eq)
 
             #################################
             #This section handles every other sign

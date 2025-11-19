@@ -122,7 +122,6 @@ def toArr(st):
 #       Looping solve function to handle multiple equations in using BODMAS
 
 def solve(arr):
-    print(arr)
     if len(arr) % 2 == 0:
         print("This can't work:", arr)
         return
